@@ -1,0 +1,20 @@
+{
+  "name": "react-native-lisp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dcdaniiel/react-native-lisp.git"
+  },
+  "keywords": [
+    "interpreter",
+    "lisp",
+    "react-native"
+  ],
+  "author": "Daniel Teixeira",
+  "license": "MIT"
+}
