@@ -1,95 +1,95 @@
-/*
-*   react-native-lisp based on minimal-lisp
-*
-*   https://github.com/kanaka/miniMAL
-*
-*   without interop.
-*
-* */
-
-module.exports = function (s = {}) {
-  function f(t, i, n) {
-    return (
-      (i = Object.create(i)),
-      t.some((e, r) =>
-        '&' == e ? (i[t[r + 1]] = n.slice(r)) : ((i[e] = n[r]), 0),
-      ),
-      i
-    );
+module.exports = function (n) {
+  function e(n, e) {
+    for (; n instanceof Array && n[0] in e && e[n[0]].M; ) n = e[n[0]](...n.slice(1));
+    return n;
   }
-  function c(t, i, e, r, n) {
+  function t(n, r) {
     for (;;) {
-      if (e)
-        return Object.keys(t).reduce((e, r) => ((e[r] = c(t[r], i)), e), e);
-      if (!Array.isArray(t))
-        return typeof '' == typeof t
-          ? t in i
-            ? i[t]
-            : s.throw(t + ' not found')
-          : typeof {} == typeof t
-          ? t && c(t, i, {})
-          : t;
-      if ('def' == t[0]) return (i[t[1]] = c(t[2], i));
-      if ('~' == t[0]) return Object.assign(c(t[1], i), { M: 1 });
-      if ('`' == t[0]) return t[1];
-      if ('.-' == t[0])
-        return (
-          (n = c(t.slice(1), i, [])),
-          (x = n[0][n[1]]),
-          2 in n ? (n[0][n[1]] = n[2]) : x
-        );
-      if ('.' == t[0])
-        return (
-          (n = c(t.slice(1), i, [])),
-          (x = n[0][n[1]]),
-          x.apply(n[0], n.slice(2))
-        );
-      if ('try' == t[0])
+      if (!(n instanceof Array)) return i(n, r);
+      if (((n = e(n, r)), !(n instanceof Array))) return i(n, r);
+      if ("def" == n[0]) return (r[n[1]] = t(n[2], r));
+      if ("~" == n[0]) {
+        let e = t(n[1], r);
+        return (e.M = 1), e;
+      }
+      if ("`" == n[0]) return n[1];
+      if (".-" == n[0]) {
+        let e = i(n.slice(1), r),
+            t = e[0][e[1]];
+        return 2 in e ? (e[0][e[1]] = e[2]) : t;
+      }
+      if ("." == n[0]) {
+        let e = i(n.slice(1), r),
+            t = e[0][e[1]];
+        return t.apply(e[0], e.slice(2));
+      }
+      if ("try" == n[0])
         try {
-          return c(t[1], i);
+          return t(n[1], r);
         } catch (e) {
-          return c(t[2][2], f([t[2][1]], i, [e]));
+          return t(n[2][2], i([n[2][1]], r, [e]));
         }
+      else if ("fn" == n[0]) {
+        let e = function (...e) {
+          return t(n[2], i(n[1], r, e));
+        };
+        return (e.A = [n[2], r, n[1]]), e;
+      }
+      if ("let" == n[0]) {
+        r = Object.create(r);
+        for (let e in n[1]) e % 2 && (r[n[1][e - 1]] = t(n[1][e], r));
+        n = n[2];
+      } else if ("do" == n[0]) {
+        let e = i(n.slice(1, n.length - 1), r);
+        n = n[n.length - 1];
+      } else if ("if" == n[0]) n = t(n[1], r) ? n[2] : n[3];
       else {
-        if ('fn' == t[0])
-          return Object.assign(
-            function (...e) {
-              return c(t[2], f(t[1], i, e));
-            },
-            { A: [t[2], i, t[1]] },
-          );
-        if ('let' == t[0])
-          (i = Object.create(i)),
-            t[1].map((e, r) => (r % 2 ? (i[t[1][r - 1]] = c(t[1][r], i)) : 0)),
-            (t = t[2]);
-        else if ('do' == t[0]) c(t.slice(1, -1), i, []), (t = t[t.length - 1]);
-        else if ('if' == t[0]) t = c(t[1], i) ? t[2] : t[3];
-        else if ((r = c(t[0], i)).M) t = r(...t.slice(1));
-        else {
-          if (((n = c(t.slice(1), i, [])), !r.A)) return r(...n);
-          (t = r.A[0]), (i = f(r.A[2], r.A[1], n));
-        }
+        let e = i(n, r),
+            t = e[0];
+        if (!t.A) return t(...e.slice(1));
+        (n = t.A[0]), (r = i(t.A[2], t.A[1], e.slice(1)));
       }
     }
   }
-  return (s = Object.assign(Object.create(s), {
-    js: eval,
-    eval: (e, r) => c(e, s),
-    '=': (e, r) => e === r,
-    '<': (e, r) => e < r,
-    '+': (e, r) => e + r,
-    '-': (e, r) => e - r,
-    '*': (e, r) => e * r,
-    '/': (e, r) => e / r,
-    isa: (e, r) => e instanceof r,
-    type: (e, r) => typeof e,
-    new: (...e) => new (e[0].bind(...e))(),
-    del: (e, r) => delete e[r],
-    throw: (e, r) => {
-      throw e;
-    },
-    read: (e, r) => JSON.parse(e),
-    rep: (e, r) => JSON.stringify(c(JSON.parse(e), s)),
-  }));
-};
+  let i = function (e, i, r) {
+    return r
+        ? ((i = Object.create(i)), e.some((n, t) => ("&" == n ? (i[e[t + 1]] = r.slice(t)) : ((i[n] = r[t]), 0))), i)
+        : e instanceof Array
+            ? e.map((...n) => t(n[0], i))
+            : typeof "" == typeof e
+                ? e in i
+                    ? i[e]
+                    : n.throw(e + " not found")
+                : e;
+  };
 
+  const lisp = {
+    js: eval,
+    evalb: (...e) => t(e[0], n),
+    "=": (...n) => n[0] === n[1],
+    "<": (...n) => n[0] < n[1],
+    "+": (...n) => n[0] + n[1],
+    "-": (...n) => n[0] - n[1],
+    "*": (...n) => n[0] * n[1],
+    "/": (...n) => n[0] / n[1],
+    isa: (...n) => n[0] instanceof n[1],
+    type: (...n) => typeof n[0],
+    new: (...n) => new (n[0].bind(...n))(),
+    del: (...n) => delete n[0][n[1]],
+    throw: (...n) => {
+      throw n[0];
+    },
+    read: (...n) => JSON.parse(n[0]),
+    slurp: (...n) => require("fs").readFileSync(n[0], "utf8"),
+    load: (...e) => t(JSON.parse(require("fs").readFileSync(e[0], "utf8")), n),
+    rep: (...e) => JSON.stringify(t(JSON.parse(e[0]), n)),
+  };
+
+  for (const l in lisp) {
+    n[l] = lisp[l]
+  }
+
+  return n;
+
+  // return (n = Object.assign(Object.create(n), lisp));
+};
